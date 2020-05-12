@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:start="20dp"
+        android:end="20dp">
+        <shape android:shape="rectangle">
+            <stroke android:width="2dp"
+                android:color = "#ADD8E6"/>
+<!--                android:dashWidth="10dip"-->
+<!--                android:dashGap="6dip"/>-->
+            <solid android:color="#ADD8E6"/>
+            <corners
+                android:topRightRadius="20dp"
+                android:bottomRightRadius="20dp"
+                android:topLeftRadius="20dp"
+                android:bottomLeftRadius="20dp"/>
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SelectActivity"
+    android:background="@drawable/gradient01"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="IoT 환풍기를 선택하세요"
+        android:fontFamily="@font/gmarketsans"
+        android:textSize="25dp"
+        android:layout_marginTop="50dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="집 밖에서도 우리집을 환기시켜요"
+        android:fontFamily="@font/gmarketsans"
+        android:textSize="16dp"
+        android:layout_marginTop="5dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/border05"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="부엌"
+            android:id="@+id/txtMove"
+            android:layout_marginLeft="50dp"
+            android:textSize="20dp"
+            android:fontFamily="@font/gmarketsansb"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="124.50.95.231:10004"
+            android:layout_marginLeft="50dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/gmarketsans"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/border05"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="거실"
+            android:layout_marginLeft="50dp"
+            android:textSize="20dp"
+            android:fontFamily="@font/gmarketsansb"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="124.50.95.241:10004"
+            android:layout_marginLeft="50dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/gmarketsans"/>
+    </LinearLayout>
+
+
+</LinearLayout>

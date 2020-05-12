@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="90"
+        android:type="linear"
+        android:endColor="#48D1CC"
+        android:centerColor="#AFEEEE"
+        android:startColor="#FFFFFF"/>
+<!--    <corners-->
+<!--        android:radius="20dp"/>        //끝부분을 둥글게 할 수-->
+</shape>
