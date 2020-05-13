@@ -1,8 +1,15 @@
 package com.example.hwankihaja;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -15,6 +22,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -34,9 +42,17 @@ public class MainActivity extends Activity {
     TextView txtConnect;
     Button btnOn;
     Button btnOff;
+    Button btnWeak;
     Switch onoff;
     TextView O_temp, O_humid, O_dust, O_gas1, O_gas2;
     TextView I_temp, I_humid, I_dust, I_gas1, I_gas2;
+    SwipeRefreshLayout swipe;
+
+    private static int REQUEST=0;
+    private static int AUTO=1;
+    private static int MANUAL_WEAK=2;
+    private static int MANUAL_STRONG=3;
+    private static int MANUAL_STOP=4;
 
 
     private Socket mSocket = null;
@@ -47,8 +63,8 @@ public class MainActivity extends Activity {
     private static final String TAG = "TcpClient";
     private boolean isConnected = false;
 
-    float o_temp=0, o_humid=1, o_dust=0, o_gas1=1, o_gas2=1;
-    float i_temp=1, i_humid=0, i_dust=1, i_gas1=0, i_gas2=1;
+    float o_temp=(float)26.42, o_humid=(float)47.00, o_dust=(float)1.37, o_gas1=(float)1.37, o_gas2=(float)90;
+    float i_temp=(float)26.64, i_humid=(float)57.00, i_dust=(float)4.24, i_gas1=(float)1.37, i_gas2=(float)92;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +75,8 @@ public class MainActivity extends Activity {
         onoff = findViewById(R.id.onoff);
         btnOn = findViewById(R.id.btnOn);
         btnOff = findViewById(R.id.btnOff);
+        btnWeak = findViewById(R.id.btnWeak);
+        swipe = (SwipeRefreshLayout) findViewById(R.id.swipe);
 
         O_temp = findViewById(R.id.o_temp);
         O_humid = findViewById(R.id.o_humid);
@@ -71,80 +89,139 @@ public class MainActivity extends Activity {
         I_gas1 = findViewById(R.id.i_gas1);
         I_gas2 = findViewById(R.id.i_gas2);
 
-        O_temp.setText(String.valueOf(o_temp));
-        O_humid.setText(String.valueOf(o_humid));
-        O_dust.setText(String.valueOf(o_dust));
-        O_gas1.setText(String.valueOf(o_gas1));
-        O_gas2.setText(String.valueOf(o_gas2));
-        I_temp.setText(String.valueOf(i_temp));
-        I_humid.setText(String.valueOf(i_humid));
-        I_dust.setText(String.valueOf(i_dust));
-        I_gas1.setText(String.valueOf(i_gas1));
-        I_gas2.setText(String.valueOf(i_gas2));
+        final ColorStateList oldColors =  I_temp.getTextColors();
 
-        if(o_temp>i_temp){
-            O_temp.setTextColor(Color.parseColor("#FF6347"));
-        }else if(o_temp<i_temp){
-            I_temp.setTextColor(Color.parseColor("#FF6347"));
+//        O_temp.setText(String.valueOf(o_temp)+"°C");
+//        O_humid.setText(String.valueOf(o_humid+"%"));
+//        O_dust.setText(String.valueOf(o_dust+"ug/m3"));
+//        O_gas1.setText(String.valueOf(o_gas1+"ppm"));
+//        O_gas2.setText(String.valueOf(o_gas2));
+//        I_temp.setText(String.valueOf(i_temp)+"°C");
+//        I_humid.setText(String.valueOf(i_humid+"%"));
+//        I_dust.setText(String.valueOf(i_dust+"ug/m3"));
+//        I_gas1.setText(String.valueOf(i_gas1+"ppm"));
+//        I_gas2.setText(String.valueOf(i_gas2));
+
+        new Thread(new ConnectThread("124.50.95.231", 10004)).start();
+        new Thread(new SenderThread("{\"id\":1,\"cmd\":"+REQUEST+"}")).start();
+        new Thread(new ReceiverThread()).start();
+
+//        if(o_temp>i_temp){
+//            O_temp.setTextColor(Color.parseColor("#FF6347"));
+//        }else if(o_temp<i_temp){
+//            I_temp.setTextColor(Color.parseColor("#FF6347"));
+//            Log.d(TAG, O_temp.getTextColors().toString());
+//        }
+//        if(o_humid>i_humid){
+//            O_humid.setTextColor(Color.parseColor("#FF6347"));
+//        }else if(o_humid<i_humid){
+//            I_humid.setTextColor(Color.parseColor("#FF6347"));
+//        }
+//        if(o_dust>i_dust){
+//            O_dust.setTextColor(Color.parseColor("#FF6347"));
+//        }else if(o_dust<i_dust){
+//            I_dust.setTextColor(Color.parseColor("#FF6347"));
+//        }
+//        if(o_gas1>i_gas1){
+//            O_gas1.setTextColor(Color.parseColor("#FF6347"));
+//        }else if(o_gas1<i_gas1){
+//            I_gas1.setTextColor(Color.parseColor("#FF6347"));
+//        }
+//        if(o_gas2>i_gas2){
+//            O_gas2.setTextColor(Color.parseColor("#FF6347"));
+//        }else if(o_gas2<i_gas2){
+//            I_gas2.setTextColor(Color.parseColor("#FF6347"));
+//        }
+
+        if(Record.getInstance().getStatus()==0){
+            txtConnect.setText("현재 부엌 \"환기 중지\" 상태입니다.");
+        }else if(Record.getInstance().getStatus()==1) {
+            txtConnect.setText("현재 부엌 \"약식 환기\" 상태입니다.");
+        }else if(Record.getInstance().getStatus()==2) {
+            txtConnect.setText("현재 부엌 \"환기\" 상태입니다.");
         }
-        if(o_humid>i_humid){
-            O_humid.setTextColor(Color.parseColor("#FF6347"));
-        }else if(o_humid<i_humid){
-            I_humid.setTextColor(Color.parseColor("#FF6347"));
-        }
-        if(o_dust>i_dust){
-            O_dust.setTextColor(Color.parseColor("#FF6347"));
-        }else if(o_dust<i_dust){
-            I_dust.setTextColor(Color.parseColor("#FF6347"));
-        }
-        if(o_gas1>i_gas1){
-            O_gas1.setTextColor(Color.parseColor("#FF6347"));
-        }else if(o_gas1<i_gas1){
-            I_gas1.setTextColor(Color.parseColor("#FF6347"));
-        }
-        if(o_gas2>i_gas2){
-            O_gas2.setTextColor(Color.parseColor("#FF6347"));
-        }else if(o_gas2<i_gas2){
-            I_gas2.setTextColor(Color.parseColor("#FF6347"));
+
+        if(Record.getInstance().getAuto()==0){
+            onoff.setChecked(false);
+        }else{
+            onoff.setChecked(true);
         }
 
         onoff.setOnCheckedChangeListener(new switchListener());
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+//                o_humid=(float)58.00;
+//                i_dust=(float)3.25;
+//                i_gas2 =(float)90;
+//                O_humid.setText(String.valueOf(o_humid+"%"));
+//                I_dust.setText(String.valueOf(i_dust+"ug/m3"));
+//                I_gas2.setText(String.valueOf(i_gas2));
+//
+//                O_humid.setTextColor(Color.parseColor("#FF6347"));
+//                I_humid.setTextColor(oldColors);
+//                I_gas2.setTextColor(oldColors);
 
-//                String sendMessage = inputText.getText().toString();
-//                if (sendMessage.length() > 0) {
-//                    new Thread(new SenderThread(sendMessage)).start();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                swipe.setRefreshing(false);
+            }
+        });
 
-        if(Record.getInstance().getStatus()=="1"){
-            btnOn.setVisibility(View.VISIBLE);
-            btnOff.setVisibility(View.VISIBLE);
+        if(Record.getInstance().getAuto()==1){
+            btnOn.setVisibility(View.INVISIBLE);
+            btnOff.setVisibility(View.INVISIBLE);
+            btnWeak.setVisibility(View.INVISIBLE);
             onoff.setChecked(true);
             Log.d(TAG,"status :"+Record.getInstance().getStatus());
         }else{
-            btnOn.setVisibility(View.INVISIBLE);
-            btnOff.setVisibility(View.INVISIBLE);
+            btnOn.setVisibility(View.VISIBLE);
+            btnOff.setVisibility(View.VISIBLE);
+            btnWeak.setVisibility(View.VISIBLE);
             onoff.setChecked(false);
             Log.d(TAG,"status :"+Record.getInstance().getStatus());
         }
         btnOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new SenderThread("01")).start();
-                Record.getInstance().setStatus("01");
+                new Thread(new SenderThread("{\"id\":1,\"cmd\":"+MANUAL_STRONG+"}")).start();
+                Record.getInstance().setStatus(2);
+                txtConnect.setText("현재 부엌 \"환기\" 상태입니다.");
+                Toast.makeText(MainActivity.this, "환기로 전환합니다", Toast.LENGTH_SHORT).show();
             }
         });
         btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new SenderThread("00")).start();
-                Record.getInstance().setStatus("00");
+                new Thread(new SenderThread("{\"id\":1,\"cmd\":"+MANUAL_STOP+"}")).start();
+                Record.getInstance().setStatus(0);
+                txtConnect.setText("현재 부엌 \"환기 중지\" 상태입니다.");
+                Toast.makeText(MainActivity.this, "환기 중단합니다", Toast.LENGTH_SHORT).show();
+            }
+        });
+        btnWeak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new SenderThread("{\"id\":1,\"cmd\":"+MANUAL_WEAK+"}")).start();
+                Record.getInstance().setStatus(1);
+                txtConnect.setText("현재 부엌 \"약식 환기\" 상태입니다.");
+                Toast.makeText(MainActivity.this, "약식 환기로 전환합니다", Toast.LENGTH_SHORT).show();
             }
         });
 
-        new Thread(new ConnectThread("192.168.0.7", 10004)).start();
+        if(o_temp >= 20 && o_humid>40 && o_humid<50) {
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(MainActivity.this)
+                    .setSmallIcon(R.mipmap.ic_launcher_new_round)
+                    .setContentTitle("빨래하자")
+                    .setContentText("지금 빨래 말리기 딱 좋아요:)")
+                    .setDefaults(Notification.DEFAULT_VIBRATE)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_new_round))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(true);
 
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse("{\"o_temp\":28.5, \"o_humid\":30.1}");
-        Log.d(TAG, "json test :"+element.getAsJsonObject().get("o_temp").getAsFloat()+","+element.getAsJsonObject().get("o_humid").getAsFloat());
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            mNotificationManager.notify(0, mBuilder.build());
+        }
     }
 
     private class ConnectThread implements Runnable{
@@ -176,22 +253,6 @@ public class MainActivity extends Activity {
                     Log.e(TAG, ("err:"+e.getMessage()));
                 }
             }
-
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run() {
-                    if (isConnected) {
-                        Log.d(TAG, "connected to "+serverIP);
-
-                        txtConnect.setText(serverIP);
-                        mReceiverThread = new Thread(new ReceiverThread());
-                        mReceiverThread.start();
-                    }else{
-                        Log.d(TAG, "failed to connect to server "+serverIP);
-                        txtConnect.setText("failed: " +serverIP);
-                    }
-                }
-            });
         }
     }
 
@@ -200,16 +261,20 @@ public class MainActivity extends Activity {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if(isChecked){
                 Log.d(TAG, "checked");
-                //new Thread(new SenderThread("1")).start();
-                Record.getInstance().setStatus("1");
-                btnOn.setVisibility(View.VISIBLE);
-                btnOff.setVisibility(View.VISIBLE);
-            }else{
-                Log.d(TAG, "not checked");
-                //new Thread(new SenderThread("0")).start();
-                Record.getInstance().setStatus("00");
+                new Thread(new SenderThread("{\"id\":1,\"cmd\":"+AUTO+"}")).start();
+                Record.getInstance().setAuto(1);
                 btnOn.setVisibility(View.INVISIBLE);
                 btnOff.setVisibility(View.INVISIBLE);
+                btnWeak.setVisibility(View.INVISIBLE);
+                Toast.makeText(MainActivity.this, "자동 환기로 전환합니다.", Toast.LENGTH_SHORT).show();
+            }else{
+                Log.d(TAG, "not checked");
+                new Thread(new SenderThread("{\"id\":1,\"cmd\":"+MANUAL_STRONG+"}")).start();
+                Record.getInstance().setStatus(0);
+                btnOn.setVisibility(View.VISIBLE);
+                btnOff.setVisibility(View.VISIBLE);
+                btnWeak.setVisibility(View.VISIBLE);
+                Toast.makeText(MainActivity.this, "수동 환기로 전환합니다", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -240,10 +305,8 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             try{
-                while(isConnected){
                     if(mIn == null){
                         Log.d(TAG, "ReceiverThread: mIn is nulll");
-                        break;
                     }
                     final String recvMessage = mIn.readLine();
                     if(recvMessage != null){
@@ -304,7 +367,6 @@ public class MainActivity extends Activity {
                             }
                         });
                     }
-                }
                 Log.d(TAG, "ReceiverThread: thread has exited");
                 if(mOut != null){
                     mOut.flush();

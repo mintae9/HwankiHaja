@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/swipe"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -20,11 +26,18 @@
             android:gravity="center">
             <TextView
                 android:id="@+id/txtConnect"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="connecting to IoT"
-                android:padding="7dp"
-                android:textColor="#696969"/>
+                android:textSize="15dp"
+                android:text="현재 상태"
+                android:layout_marginTop="10dp"
+                android:textColor="#708090"
+                android:textStyle="bold"
+                android:background="@drawable/border05"
+                android:gravity="center"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                />
         </LinearLayout>
         <LinearLayout
             android:layout_width="wrap_content"
@@ -37,8 +50,7 @@
                 android:id="@+id/onoff"
                 android:textStyle="normal"
                 android:fontFamily="@font/gmarketsans"
-                android:text="자동 환기 설정 "
-                android:checked="true"/>
+                android:text="자동 환기 설정 "/>
         </LinearLayout>
     </LinearLayout>
 
@@ -48,26 +60,28 @@
         android:orientation="horizontal"
         android:gravity="center">
         <Button
-            android:layout_width="160dp"
+            android:layout_width="100dp"
             android:layout_height="48dp"
             android:id="@+id/btnOn"
-            android:text="ON"
+            android:text="환기"
             android:background="@drawable/border"
             android:visibility="visible"/>
         <Button
-            android:layout_width="160dp"
+            android:layout_width="100dp"
+            android:layout_height="48dp"
+            android:id="@+id/btnWeak"
+            android:text="약식 환기"
+            android:background="@drawable/border06"
+            android:visibility="visible"/>
+        <Button
+            android:layout_width="100dp"
             android:layout_height="48dp"
             android:id="@+id/btnOff"
-            android:text="OFF"
+            android:text="환기 중지"
             android:background="@drawable/border02"
             android:visibility="visible"/>
     </LinearLayout>
-<!--    <TextView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:gravity="center"-->
-<!--        android:text="status"-->
-<!--        android:id="@+id/txtStatus"/>-->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -228,3 +242,4 @@
         </TableLayout>
     </LinearLayout>
 </LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
